@@ -4,6 +4,7 @@ export interface TeamStanding {
     teamName: string,
     standingResults: GameStanding[],
     divisionID: number,
+    totalGames: number,
 }
 
 export interface GameStanding

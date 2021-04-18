@@ -1,15 +1,15 @@
 import React from 'react';
+import { ApiService } from '../Shared/Api.Service';
 import { TeamStanding } from '../Shared/Standings.Model';
 
 export interface State {
   error: any;
   isLoaded: boolean;
-  items: any;
+  items: TeamStanding[];
 };
 
 class Content extends React.Component {
   public state: State;
-  public data: TeamStanding[];
 
   constructor(props: any) {
     super(props);
@@ -18,32 +18,28 @@ class Content extends React.Component {
       isLoaded: false,
       items: []
     };
-    this.data = [];
   }
 
-  componentDidMount() {
-    const axios = require('axios');
-
+  async componentDidMount() {
+    // comma seperate team ids, https://statsapi.web.nhl.com/api/v1/schedule?teamId=9,%2010&startDate=2021-01-01&endDate=2021-03-07
     // Make a request for a user with a given ID
-    axios.get('https://statsapi.web.nhl.com/api/v1/schedule?teamId=9&startDate=2021-01-01&endDate=2021-03-07')
-      .then((response: any) => {
-        // handle success
-        this.setState(
-          {
-            error: null,
-            isLoaded: true,
-            items: response.data
-          });
-      })
-      .catch((error: any) => {
-        // handle error
-        this.setState(
-          {
-            error: error,
-            isLoaded: true,
-            items: null
-          });
+    const stnds = await ApiService.GetTeamStats();
+    if(stnds && stnds.status === 200)
+    {
+      this.setState({
+        error: null, 
+        isLoaded: true, 
+        items: ApiService.MapTeamStanding(stnds.data)
       });
+    }
+    else
+    {
+      this.setState({
+        error: {message: "Error Loading Data", status: stnds.status+':'+stnds.statusText}, 
+        isLoaded: true, 
+        items: []
+      });
+    }
   }
 
   render() {
