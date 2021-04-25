@@ -12,7 +12,6 @@ ReactDOM.render(
     <SiteNavbar></SiteNavbar>
     <Content>
     </Content>
-    <Graph/>
   </React.StrictMode>,
   document.getElementById('root')
 );

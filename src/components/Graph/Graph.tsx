@@ -1,18 +1,21 @@
 import React from 'react';
+import { TeamStanding } from '../Shared/Standings.Model';
 
-function Graph() {
+function Graph(props: any) {
   const Chart = require('react-charts').Chart;
+  const standings: TeamStanding[] = props.standings;
+  const graphStandings = standings.map(
+    stnding =>  {
+      return {
+      label: stnding.teamName,
+      data: stnding.standingResults.map(result => { return {x: result.gameNumber, y: result.points};})
+      };
+    });
+
   const data = React.useMemo(
-    () => [
-      {
-        label: 'Series 1',
-        data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
-      },
-      {
-        label: 'Series 2',
-        data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
-      }
-    ],
+    () => 
+      graphStandings
+    ,
     []
   )
  
@@ -27,12 +30,11 @@ function Graph() {
   const lineChart = (
     // A react-chart hyper-responsively and continuously fills the available
     // space of its parent element automatically
-    <div
-      style={{
-        width: '400px',
-        height: '300px'
-      }}
-    >
+    <div style={{
+      width:'90%',
+      height:'500px',
+      margin: '30px'
+    }}>
       <Chart data={data} axes={axes} />
     </div>
   )

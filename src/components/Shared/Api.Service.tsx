@@ -6,7 +6,7 @@ export const ApiService =
 {
     GetTeamStats(): Promise<AxiosResponse<ApiStandings>>
     {
-        return axios.get('https://statsapi.web.nhl.com/api/v1/schedule?teamId=9&startDate=2021-01-01&endDate=2021-03-07');
+        return axios.get('https://statsapi.web.nhl.com/api/v1/schedule?startDate=2021-01-01&endDate=2021-03-07');
     },
     MapTeamStanding(apiModel: ApiStandings): TeamStanding[]
     {
@@ -21,9 +21,10 @@ export const ApiService =
                     let homeWin = homeTeam.score > awayTeam.score;
                     if(teamIds.includes(homeTeam.team.id))
                     {
-                        let lastGame = standings.find(x => x.teamId === homeTeam.team.id)?.standingResults.pop();
+                        let results = standings.find(x => x.teamId === homeTeam.team.id)!.standingResults;
+                        let lastGame = results[results?.length - 1];
                         lastGame = lastGame ? lastGame: {gameNumber: 1, points: 0};
-                        standings.find(x => x.teamId === homeTeam.team.id)?.standingResults.push(
+                        results.push(
                             {
                                 gameNumber: lastGame?.gameNumber + 1,
                                 points: lastGame?.points + (homeWin ? 1: 0), 
@@ -47,9 +48,10 @@ export const ApiService =
                     }
                     if(teamIds.includes(awayTeam.team.id))
                     {
-                        let lastGame = standings.find(x => x.teamId === awayTeam.team.id)?.standingResults.pop();
+                        let results = standings.find(x => x.teamId === awayTeam.team.id)!.standingResults;
+                        let lastGame = results[results?.length - 1];
                         lastGame = lastGame ? lastGame: {gameNumber: 1, points: 0};
-                        standings.find(x => x.teamId === awayTeam.team.id)?.standingResults.push(
+                        results.push(
                             {
                                 gameNumber: lastGame?.gameNumber + 1,
                                 points: lastGame?.points + (homeWin ? 0: 1), 

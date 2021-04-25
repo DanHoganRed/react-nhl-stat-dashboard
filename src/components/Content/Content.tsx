@@ -1,4 +1,5 @@
 import React from 'react';
+import Graph from '../Graph/Graph';
 import { ApiService } from '../Shared/Api.Service';
 import { TeamStanding } from '../Shared/Standings.Model';
 
@@ -50,9 +51,12 @@ class Content extends React.Component {
       return <div>Loading...</div>;
     } else {
       return (
-        <p>
-          {JSON.stringify(items, null, 2)}
-        </p>
+        <div>
+          <Graph standings={items}/>
+          <p>
+            {JSON.stringify(items, null, 2)}
+          </p>
+        </div>
       );
     }
   }
