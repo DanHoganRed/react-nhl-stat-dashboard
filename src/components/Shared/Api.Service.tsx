@@ -1,17 +1,26 @@
 import axios, { AxiosResponse } from "axios";
-import { ApiStandings } from "./API.Model";
+import { ApiDivisionInfo, ApiStandings, ApiTeamInfo } from "./API.Model";
 import { TeamStanding } from "./Standings.Model";
 
 export const ApiService =
 {
-    GetTeamStats(): Promise<AxiosResponse<ApiStandings>>
+    GetTeamStats(start: string, end: string): Promise<AxiosResponse<ApiStandings>>
     {
-        return axios.get('https://statsapi.web.nhl.com/api/v1/schedule?startDate=2021-01-01&endDate=2021-03-07');
+        return axios.get('https://statsapi.web.nhl.com/api/v1/schedule?startDate='+start+'&endDate='+end);
     },
-    MapTeamStanding(apiModel: ApiStandings): TeamStanding[]
+    MapTeamStanding(apiModel: ApiStandings, teams: ApiTeamInfo): TeamStanding[]
     {
         let standings: TeamStanding[] = [];
-        let teamIds: number[] = [];
+        teams.teams.forEach(team => {
+            standings.push({
+                divisionID: team.division.id,
+                teamIcon: '',
+                teamId: team.id,
+                teamName: team.name,
+                totalGames: 1,
+                standingResults:[{gameNumber: 0, points: 0}]
+            });
+        });
         apiModel.dates.forEach(date => {
             date.games.forEach(game => 
                 {
@@ -19,62 +28,39 @@ export const ApiService =
                     let awayTeam = game.teams.away;
                     
                     let homeWin = homeTeam.score > awayTeam.score;
-                    if(teamIds.includes(homeTeam.team.id))
-                    {
-                        let results = standings.find(x => x.teamId === homeTeam.team.id)!.standingResults;
-                        let lastGame = results[results?.length - 1];
-                        lastGame = lastGame ? lastGame: {gameNumber: 1, points: 0};
-                        results.push(
-                            {
-                                gameNumber: lastGame?.gameNumber + 1,
-                                points: lastGame?.points + (homeWin ? 1: 0), 
-                            }
-                        );
-                    }
-                    else
-                    {
-                        teamIds.push(homeTeam.team.id);
-                        standings.push({
-                            divisionID: 0,
-                            teamIcon: '',
-                            teamId: homeTeam.team.id,
-                            teamName: homeTeam.team.name,
-                            totalGames: 1,
-                            standingResults:[{
-                                gameNumber: 1,
-                                points: (homeWin ? 1: 0)
-                            }]
-                        });
-                    }
-                    if(teamIds.includes(awayTeam.team.id))
-                    {
-                        let results = standings.find(x => x.teamId === awayTeam.team.id)!.standingResults;
-                        let lastGame = results[results?.length - 1];
-                        lastGame = lastGame ? lastGame: {gameNumber: 1, points: 0};
-                        results.push(
-                            {
-                                gameNumber: lastGame?.gameNumber + 1,
-                                points: lastGame?.points + (homeWin ? 0: 1), 
-                            }
-                        );
-                    }
-                    else
-                    {
-                        teamIds.push(awayTeam.team.id);
-                        standings.push({
-                            divisionID: 0,
-                            teamIcon: '',
-                            teamId: awayTeam.team.id,
-                            teamName: awayTeam.team.name,
-                            totalGames: 1,
-                            standingResults:[{
-                                gameNumber: 1,
-                                points: (homeWin ? 0: 1)
-                            }]
-                        });
-                    }
+                    // HomeTeam
+                    AddData(standings, homeTeam.team.id, homeWin);
+                    // AwayTeam
+                    AddData(standings, awayTeam.team.id, !homeWin);
                 });
         });
         return standings;
-    }
+    },
+    GetTeamsInfo(season: string): Promise<AxiosResponse<ApiTeamInfo>>
+    {
+        return axios.get('https://statsapi.web.nhl.com/api/v1/teams?season='+season);
+    },
+    GetDivisionsFromTeams(info: ApiTeamInfo): ApiDivisionInfo[]
+    {
+        let divisions: ApiDivisionInfo[] = [];
+        info.teams.forEach(x => {
+            if(!divisions.find(y => y.id === x.division.id))
+            {
+                divisions.push(x.division);
+            }
+        });
+        return divisions;
+    },
+}
+
+function AddData(standings: TeamStanding[], teamID: number, win: boolean)
+{
+    let results = standings.find(x => x.teamId === teamID)!.standingResults;
+    let lastGame =  results[results.length - 1];
+    results.push(
+        {
+            gameNumber: lastGame.gameNumber + 1,
+            points: lastGame.points + (win ? 2: 0), 
+        }
+    );
 }

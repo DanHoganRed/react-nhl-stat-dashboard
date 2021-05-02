@@ -1,3 +1,4 @@
+
 export interface ApiStandings
 {
     totalGames: number,
@@ -41,4 +42,30 @@ export interface ApiStandings
             }
         }]
     }]
+}
+
+export interface ApiTeamInfo
+{
+    teams: {
+        id: number,
+        name: string,
+        abbreviation: string,
+        teamName: string,
+        division: ApiDivisionInfo,
+        conference: {
+            id: number,
+            name: string, 
+            link: string,
+        },
+        active: boolean
+    }[],
+}
+
+export interface ApiDivisionInfo
+{
+    id: number,
+    name: string,
+    nameShort: string,
+    link: string,
+    abbreviation: string,
 }

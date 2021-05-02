@@ -5,7 +5,6 @@ import reportWebVitals from './reportWebVitals';
 import SiteNavbar from './components/SiteNavbar/SiteNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Content from './components/Content/Content'
-import Graph from './components/Graph/Graph';
 
 ReactDOM.render(
   <React.StrictMode>
